@@ -24,7 +24,7 @@
     </style>
 
               
-                <details id="adminSection" class="bg-white p-6 rounded-lg shadow-lg mb-6 cursor-pointer">
+                <details id="adminSection" class="bg-white p-2 rounded-lg shadow-lg mb-2 cursor-pointer">
             <summary class="font-semibold text-lg text-blue-700">
                 Área de Atualização (Admin)
             </summary>
