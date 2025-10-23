@@ -23,16 +23,8 @@
             -webkit-appearance: none;
         }
     </style>
-</head>
-<body class="bg-gray-100 min-h-screen p-4 md:p-8">
 
-    <div class="container mx-auto max-w-6xl">
-        
-        <header class="bg-white p-2 rounded-lg shadow-lg mb-2">
-                        <h1 class="text-xl sm:text-1xl font-bold text-gray-800">Lista de Produtos (Ruptura)</h1>
-            <p class="text-gray-600 mt-1 text-sm sm:text-base">Consulte os produtos que não podem faltar.</p>
-        </header>
-
+              
                 <details id="adminSection" class="bg-white p-6 rounded-lg shadow-lg mb-6 cursor-pointer">
             <summary class="font-semibold text-lg text-blue-700">
                 Área de Atualização (Admin)
