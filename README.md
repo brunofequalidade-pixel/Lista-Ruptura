@@ -30,8 +30,9 @@
     <div class="container mx-auto max-w-6xl">
         
         <header class="bg-white p-6 rounded-lg shadow-lg mb-6">
-            <h1 class="text-3xl font-bold text-gray-800">Lista de Produtos (Ruptura)</h1>
-            <p class="text-gray-600 mt-1">Consulte os produtos que não podem faltar.</p>
+            <!-- **** RESPONSIVIDADE: Tamanho da fonte ajustado **** -->
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">Lista de Produtos (Ruptura)</h1>
+            <p class="text-gray-600 mt-1 text-sm sm:text-base">Consulte os produtos que não podem faltar.</p>
         </header>
 
         <!-- Seção do Admin para Atualizar a Lista -->
@@ -56,11 +57,16 @@
 
         <!-- Seção de Filtros e Pesquisa -->
         <div class="bg-white p-6 rounded-lg shadow-lg mb-6">
-            <h2 class="text-xl font-semibold text-gray-700 mb-4">Filtros</h2>
+            <!-- **** RESPONSIVIDADE: Tamanho da fonte ajustado **** -->
+            <h2 class="text-lg sm:text-xl font-semibold text-gray-700 mb-4">Filtros</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label for="filterSetor" class="block text-sm font-medium text-gray-700">Filtrar por Setor</label>
-                    <input type="text" id="filterSetor" placeholder="Digite o nome do setor..." class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <!-- **** ALTERAÇÃO: Input trocado por Select **** -->
+                    <select id="filterSetor" class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white">
+                        <option value="">Todos os Setores</option>
+                        <!-- Opções serão adicionadas pelo JavaScript -->
+                    </select>
                 </div>
                 <div>
                     <label for="searchTerm" class="block text-sm font-medium text-gray-700">Pesquisar por Item ou Endereço</label>
@@ -72,7 +78,8 @@
         <!-- Tabela de Produtos -->
         <div class="bg-white rounded-lg shadow-lg">
             <div class="p-6">
-                <h2 class="text-xl font-semibold text-gray-700">Produtos</h2>
+                 <!-- **** RESPONSIVIDADE: Tamanho da fonte ajustado **** -->
+                <h2 class="text-lg sm:text-xl font-semibold text-gray-700">Produtos</h2>
                 <p id="rowCount" class="text-sm text-gray-500 mt-1">Total de itens: 0</p>
             </div>
             <div class="table-container">
@@ -106,7 +113,6 @@
         import {
             getAuth,
             signInAnonymously,
-            // signInWithCustomToken não é mais necessário aqui
             onAuthStateChanged
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import {
@@ -117,7 +123,6 @@
             setLogLevel
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // **** CONFIGURAÇÃO DO FIREBASE ATUALIZADA ****
         // Config Firebase (fornecida pelo usuário)
         const firebaseConfig = {
             apiKey: "AIzaSyBo8G3ZcWk4EepN0cHdVBtXc7tGOfcw-yg",
@@ -129,13 +134,12 @@
             measurementId: "G-PEDG30FS2R"
         };
         
-        // Usaremos o projectId como o 'appId' lógico para o caminho do Firestore
         const appId = firebaseConfig.projectId || 'default-app-id';
 
         // Variáveis globais
         let db, auth;
-        let allProducts = []; // Armazena a lista completa vinda do Firebase
-        let authReady = false; // Controle para saber se a autenticação foi concluída
+        let allProducts = []; 
+        let authReady = false; 
         let listDocRef; 
 
         // Elementos da DOM
@@ -157,14 +161,9 @@
                 db = getFirestore(app);
                 auth = getAuth(app);
                 
-                // Define o caminho do documento no Firestore
-                // /artifacts/{projectId}/public/data/productList/mainList
                 listDocRef = doc(db, "artifacts", appId, "public/data", "productList", "mainList");
-
-                // Habilita logs para depuração
                 setLogLevel('debug');
 
-                // Escuta mudanças no estado de autenticação
                 onAuthStateChanged(auth, async (user) => {
                     if (user) {
                         console.log("Usuário autenticado:", user.uid);
@@ -174,8 +173,6 @@
                         console.log("Nenhum usuário. Tentando login anônimo...");
                         authReady = false;
                         try {
-                            // **** LÓGICA DE LOGIN ATUALIZADA ****
-                            // Como não há token inicial, sempre logamos anonimamente
                             await signInAnonymously(auth);
                         } catch (error) {
                             console.error("Erro ao autenticar anonimamente:", error);
@@ -200,17 +197,46 @@
             
             const lines = text.trim().split('\n');
             return lines
-                .filter(line => line.trim() !== "") // Ignora linhas em branco
+                .filter(line => line.trim() !== "") 
                 .map(line => {
-                    const parts = line.split('\t'); // Excel cola com TABS
+                    const parts = line.split('\t'); 
                     return {
-                        setor: parts[0] || '',
-                        item: parts[1] || '',
-                        descricao: parts[2] || '',
-                        endereco: parts[3] || ''
+                        setor: parts[0] ? parts[0].trim() : '',
+                        item: parts[1] ? parts[1].trim() : '',
+                        descricao: parts[2] ? parts[2].trim() : '',
+                        endereco: parts[3] ? parts[3].trim() : ''
                     };
                 });
         }
+
+        /**
+         * **** NOVA FUNÇÃO ****
+         * Popula a lista suspensa de setores com valores únicos.
+         */
+        function populateSetorFilter() {
+            // Guarda o valor selecionado antes de limpar
+            const currentValue = filterSetor.value;
+            
+            // Extrai setores únicos e não vazios da lista de produtos
+            const setores = allProducts.map(p => p.setor).filter(s => s.length > 0);
+            const uniqueSetores = [...new Set(setores)];
+            uniqueSetores.sort(); // Ordena alfabeticamente
+
+            // Limpa o select e adiciona a opção padrão
+            filterSetor.innerHTML = '<option value="">Todos os Setores</option>';
+
+            // Adiciona cada setor como uma nova opção
+            uniqueSetores.forEach(setor => {
+                const option = document.createElement('option');
+                option.value = setor;
+                option.textContent = setor;
+                filterSetor.appendChild(option);
+            });
+
+            // Restaura o valor selecionado, se ele ainda existir
+            filterSetor.value = currentValue;
+        }
+
 
         /**
          * Carrega a lista de produtos do Firebase em tempo real (onSnapshot).
@@ -234,6 +260,12 @@
                     allProducts = [];
                     tableBody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-gray-500">A lista de produtos está vazia. Peça ao administrador para carregar os dados.</td></tr>`;
                 }
+                
+                // **** ATUALIZAÇÃO ****
+                // Popula o filtro de setor *depois* que os dados são carregados
+                populateSetorFilter();
+                
+                // Renderiza a tabela
                 renderTable();
             }, (error) => {
                 console.error("Erro ao carregar lista do Firestore:", error);
@@ -245,16 +277,24 @@
          * Renderiza a tabela com base nos filtros e na lista 'allProducts'.
          */
         function renderTable() {
-            const setorFilter = filterSetor.value.toLowerCase();
+            // **** ATUALIZAÇÃO ****
+            // Pega o valor exato do select (sem .toLowerCase())
+            const setorFilter = filterSetor.value;
             const searchFilter = searchTerm.value.toLowerCase();
 
             const filteredProducts = allProducts.filter(product => {
-                const pSetor = product.setor.toLowerCase();
+                // **** ATUALIZAÇÃO ****
+                // Pega o valor exato (sem .toLowerCase())
+                const pSetor = product.setor;
                 const pItem = product.item.toLowerCase();
                 const pDesc = product.descricao.toLowerCase();
                 const pEnd = product.endereco.toLowerCase();
-                const matchSetor = !setorFilter || pSetor.includes(setorFilter);
+
+                // **** ATUALIZAÇÃO ****
+                // Compara o valor exato do setor
+                const matchSetor = !setorFilter || pSetor === setorFilter;
                 const matchSearch = !searchFilter || pItem.includes(searchFilter) || pEnd.includes(searchFilter);
+                
                 return matchSetor && matchSearch;
             });
 
@@ -339,7 +379,8 @@
         }
 
         // Adiciona os event listeners para os filtros
-        filterSetor.addEventListener('input', renderTable);
+        // **** ATUALIZAÇÃO: Evento 'input' trocado por 'change' para o select ****
+        filterSetor.addEventListener('change', renderTable);
         searchTerm.addEventListener('input', renderTable);
 
         // Adiciona o event listener para o botão de salvar
@@ -347,27 +388,18 @@
 
         // Lógica de senha para a seção Admin
         adminSection.addEventListener('toggle', function(event) {
-            // Se a intenção é ABRIR a seção
             if (!this.hasAttribute('open')) {
-                // Previne a abertura padrão
                 event.preventDefault();
-
-                // Pede a senha
                 const password = prompt("Por favor, digite a senha de administrador:");
-
-                // Verifica a senha
                 if (password === "brunofe") {
-                    // Correto, abre a seção
                     this.open = true;
                 } else {
-                    // Incorreto
-                    if (password !== null) { // Evita alerta se o usuário clicar em "cancelar"
+                    if (password !== null) { 
                         alert("Senha incorreta. Acesso negado.");
                     }
                     this.open = false;
                 }
             }
-            // Se a intenção é FECHAR, permite o comportamento padrão
         });
 
         // Inicia o aplicativo
@@ -376,3 +408,4 @@
     </script>
 </body>
 </html>
+
