@@ -28,8 +28,8 @@
 
     <div class="container mx-auto max-w-6xl">
         
-        <header class="bg-white p-6 rounded-lg shadow-lg mb-6">
-                        <h1 class="text-xl sm:text-2xl font-bold text-gray-800">Lista de Produtos (Ruptura)</h1>
+        <header class="bg-white p-2 rounded-lg shadow-lg mb-2">
+                        <h1 class="text-xl sm:text-1xl font-bold text-gray-800">Lista de Produtos (Ruptura)</h1>
             <p class="text-gray-600 mt-1 text-sm sm:text-base">Consulte os produtos que não podem faltar.</p>
         </header>
 
