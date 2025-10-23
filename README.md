@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lista de Produtos - Ruptura</title>
+    <!-- Carrega o Tailwind CSS para estilização -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Fonte Inter para um visual mais limpo */
@@ -33,6 +34,7 @@
             <p class="text-gray-600 mt-1">Consulte os produtos que não podem faltar.</p>
         </header>
 
+        <!-- Seção do Admin para Atualizar a Lista -->
         <details id="adminSection" class="bg-white p-6 rounded-lg shadow-lg mb-6 cursor-pointer">
             <summary class="font-semibold text-lg text-blue-700">
                 Área de Atualização (Admin)
@@ -52,6 +54,7 @@
             </div>
         </details>
 
+        <!-- Seção de Filtros e Pesquisa -->
         <div class="bg-white p-6 rounded-lg shadow-lg mb-6">
             <h2 class="text-xl font-semibold text-gray-700 mb-4">Filtros</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -66,6 +69,7 @@
             </div>
         </div>
 
+        <!-- Tabela de Produtos -->
         <div class="bg-white rounded-lg shadow-lg">
             <div class="p-6">
                 <h2 class="text-xl font-semibold text-gray-700">Produtos</h2>
@@ -82,6 +86,7 @@
                         </tr>
                     </thead>
                     <tbody id="tableBody" class="divide-y divide-gray-200">
+                        <!-- Linhas da tabela serão inseridas pelo JavaScript -->
                         <tr>
                             <td colspan="4" class="p-6 text-center text-gray-500">
                                 Carregando lista de produtos...
@@ -94,13 +99,14 @@
 
     </div>
 
+    <!-- Firebase -->
     <script type="module">
         // Importações do Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import {
             getAuth,
             signInAnonymously,
-            signInWithCustomToken,
+            // signInWithCustomToken não é mais necessário aqui
             onAuthStateChanged
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import {
@@ -111,10 +117,20 @@
             setLogLevel
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Configuração do Firebase (será injetada pelo ambiente)
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        // **** CONFIGURAÇÃO DO FIREBASE ATUALIZADA ****
+        // Config Firebase (fornecida pelo usuário)
+        const firebaseConfig = {
+            apiKey: "AIzaSyBo8G3ZcWk4EepN0cHdVBtXc7tGOfcw-yg",
+            authDomain: "inscricaosinuca.firebaseapp.com",
+            projectId: "inscricaosinuca",
+            storageBucket: "inscricaosinuca.firebasestorage.app",
+            messagingSenderId: "338241576305",
+            appId: "1:338241576305:web:288b6124384c6be4f76ad0",
+            measurementId: "G-PEDG30FS2R"
+        };
+        
+        // Usaremos o projectId como o 'appId' lógico para o caminho do Firestore
+        const appId = firebaseConfig.projectId || 'default-app-id';
 
         // Variáveis globais
         let db, auth;
@@ -130,7 +146,6 @@
         const saveButton = document.getElementById('saveButton');
         const dataPasteArea = document.getElementById('dataPasteArea');
         const saveStatus = document.getElementById('saveStatus');
-        // **** NOVA REFERÊNCIA DE ELEMENTO ****
         const adminSection = document.getElementById('adminSection');
 
         /**
@@ -142,6 +157,8 @@
                 db = getFirestore(app);
                 auth = getAuth(app);
                 
+                // Define o caminho do documento no Firestore
+                // /artifacts/{projectId}/public/data/productList/mainList
                 listDocRef = doc(db, "artifacts", appId, "public/data", "productList", "mainList");
 
                 // Habilita logs para depuração
@@ -154,16 +171,14 @@
                         authReady = true;
                         loadProductList();
                     } else {
-                        console.log("Nenhum usuário. Tentando login...");
+                        console.log("Nenhum usuário. Tentando login anônimo...");
                         authReady = false;
                         try {
-                            if (initialAuthToken) {
-                                await signInWithCustomToken(auth, initialAuthToken);
-                            } else {
-                                await signInAnonymously(auth);
-                            }
+                            // **** LÓGICA DE LOGIN ATUALIZADA ****
+                            // Como não há token inicial, sempre logamos anonimamente
+                            await signInAnonymously(auth);
                         } catch (error) {
-                            console.error("Erro ao autenticar:", error);
+                            console.error("Erro ao autenticar anonimamente:", error);
                             tableBody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-red-500">Erro de autenticação. Não foi possível carregar os dados.</td></tr>`;
                         }
                     }
@@ -330,30 +345,29 @@
         // Adiciona o event listener para o botão de salvar
         saveButton.addEventListener('click', saveListToFirebase);
 
-        // **** CÓDIGO NOVO ADICIONADO PARA A SENHA ****
+        // Lógica de senha para a seção Admin
         adminSection.addEventListener('toggle', function(event) {
-            // Se a intenção é ABRIR a seção (o 'open' ainda não foi totalmente setado)
+            // Se a intenção é ABRIR a seção
             if (!this.hasAttribute('open')) {
-                // Previne a abertura padrão para podermos validar a senha
+                // Previne a abertura padrão
                 event.preventDefault();
 
-                // Pede a senha ao usuário
+                // Pede a senha
                 const password = prompt("Por favor, digite a senha de administrador:");
 
-                // Verifica se a senha está correta
+                // Verifica a senha
                 if (password === "brunofe") {
-                    // Se estiver correta, abre a seção programaticamente
+                    // Correto, abre a seção
                     this.open = true;
                 } else {
-                     // Se a senha estiver errada (e o usuário não clicou em 'cancelar')
-                    if (password !== null) {
+                    // Incorreto
+                    if (password !== null) { // Evita alerta se o usuário clicar em "cancelar"
                         alert("Senha incorreta. Acesso negado.");
                     }
-                    // Garante que a seção permaneça fechada
                     this.open = false;
                 }
             }
-            // Se a intenção é FECHAR, não fazemos nada e deixamos o comportamento padrão ocorrer
+            // Se a intenção é FECHAR, permite o comportamento padrão
         });
 
         // Inicia o aplicativo
