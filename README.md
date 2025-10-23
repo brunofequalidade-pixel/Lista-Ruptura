@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lista de Produtos - Ruptura</title>
-    <!-- Carrega o Tailwind CSS para estilização -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Fonte Inter para um visual mais limpo */
@@ -28,14 +27,13 @@
 <body class="bg-gray-100 min-h-screen p-4 md:p-8">
 
     <div class="container mx-auto max-w-6xl">
-       
+        
         <header class="bg-white p-6 rounded-lg shadow-lg mb-6">
             <h1 class="text-3xl font-bold text-gray-800">Lista de Produtos (Ruptura)</h1>
             <p class="text-gray-600 mt-1">Consulte os produtos que não podem faltar.</p>
         </header>
 
-        <!-- Seção do Admin para Atualizar a Lista -->
-        <details class="bg-white p-6 rounded-lg shadow-lg mb-6 cursor-pointer">
+        <details id="adminSection" class="bg-white p-6 rounded-lg shadow-lg mb-6 cursor-pointer">
             <summary class="font-semibold text-lg text-blue-700">
                 Área de Atualização (Admin)
             </summary>
@@ -54,7 +52,6 @@
             </div>
         </details>
 
-        <!-- Seção de Filtros e Pesquisa -->
         <div class="bg-white p-6 rounded-lg shadow-lg mb-6">
             <h2 class="text-xl font-semibold text-gray-700 mb-4">Filtros</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -69,7 +66,6 @@
             </div>
         </div>
 
-        <!-- Tabela de Produtos -->
         <div class="bg-white rounded-lg shadow-lg">
             <div class="p-6">
                 <h2 class="text-xl font-semibold text-gray-700">Produtos</h2>
@@ -86,7 +82,6 @@
                         </tr>
                     </thead>
                     <tbody id="tableBody" class="divide-y divide-gray-200">
-                        <!-- Linhas da tabela serão inseridas pelo JavaScript -->
                         <tr>
                             <td colspan="4" class="p-6 text-center text-gray-500">
                                 Carregando lista de produtos...
@@ -99,7 +94,6 @@
 
     </div>
 
-    <!-- Firebase -->
     <script type="module">
         // Importações do Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -126,12 +120,7 @@
         let db, auth;
         let allProducts = []; // Armazena a lista completa vinda do Firebase
         let authReady = false; // Controle para saber se a autenticação foi concluída
-        let listDocRef; // Declarada aqui, mas inicializada no initFirebase
-
-        // Referência para o documento no Firestore onde a lista será salva
-        // Usamos um caminho público para que todos com o link possam ler
-        // REMOVIDA A INICIALIZAÇÃO DAQUI
-        // const listDocRef = doc(db, "artifacts", appId, "public/data", "productList", "mainList");
+        let listDocRef; 
 
         // Elementos da DOM
         const filterSetor = document.getElementById('filterSetor');
@@ -141,6 +130,8 @@
         const saveButton = document.getElementById('saveButton');
         const dataPasteArea = document.getElementById('dataPasteArea');
         const saveStatus = document.getElementById('saveStatus');
+        // **** NOVA REFERÊNCIA DE ELEMENTO ****
+        const adminSection = document.getElementById('adminSection');
 
         /**
          * Inicializa o Firebase e configura a autenticação
@@ -150,11 +141,8 @@
                 const app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
-               
-                // --- CORREÇÃO AQUI ---
-                // Inicializa a referência do documento AQUI, depois que 'db' existe
+                
                 listDocRef = doc(db, "artifacts", appId, "public/data", "productList", "mainList");
-                // --- FIM DA CORREÇÃO ---
 
                 // Habilita logs para depuração
                 setLogLevel('debug');
@@ -164,17 +152,14 @@
                     if (user) {
                         console.log("Usuário autenticado:", user.uid);
                         authReady = true;
-                        // Agora que estamos autenticados, podemos carregar a lista
                         loadProductList();
                     } else {
                         console.log("Nenhum usuário. Tentando login...");
                         authReady = false;
                         try {
-                            // Tenta autenticar com o token inicial, se existir
                             if (initialAuthToken) {
                                 await signInWithCustomToken(auth, initialAuthToken);
                             } else {
-                                // Se não, faz login anônimo
                                 await signInAnonymously(auth);
                             }
                         } catch (error) {
@@ -197,7 +182,7 @@
             if (!text || text.trim() === "") {
                 return [];
             }
-           
+            
             const lines = text.trim().split('\n');
             return lines
                 .filter(line => line.trim() !== "") // Ignora linhas em branco
@@ -222,14 +207,11 @@
             }
 
             console.log("Tentando carregar lista do Firestore...");
-           
-            // onSnapshot escuta mudanças no documento em tempo real
+            
             onSnapshot(listDocRef, (docSnap) => {
                 if (docSnap.exists()) {
                     console.log("Dados recebidos do Firestore.");
                     const data = docSnap.data();
-                    // O documento salvo contém o texto bruto que foi colado
-                    // Precisamos convertê-lo para nosso array de produtos
                     allProducts = parsePastedData(data.rawProductData || "");
                     console.log(`Lista carregada com ${allProducts.length} produtos.`);
                 } else {
@@ -237,7 +219,6 @@
                     allProducts = [];
                     tableBody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-gray-500">A lista de produtos está vazia. Peça ao administrador para carregar os dados.</td></tr>`;
                 }
-                // Após carregar (ou falhar), renderiza a tabela com os filtros atuais
                 renderTable();
             }, (error) => {
                 console.error("Erro ao carregar lista do Firestore:", error);
@@ -249,32 +230,22 @@
          * Renderiza a tabela com base nos filtros e na lista 'allProducts'.
          */
         function renderTable() {
-            // Pega os valores atuais dos filtros
             const setorFilter = filterSetor.value.toLowerCase();
             const searchFilter = searchTerm.value.toLowerCase();
 
-            // Filtra a lista principal
             const filteredProducts = allProducts.filter(product => {
                 const pSetor = product.setor.toLowerCase();
                 const pItem = product.item.toLowerCase();
                 const pDesc = product.descricao.toLowerCase();
                 const pEnd = product.endereco.toLowerCase();
-
-                // 1. Verifica o filtro de setor
                 const matchSetor = !setorFilter || pSetor.includes(setorFilter);
-
-                // 2. Verifica o filtro de pesquisa (Item ou Endereço)
                 const matchSearch = !searchFilter || pItem.includes(searchFilter) || pEnd.includes(searchFilter);
-
-                // O produto deve passar nos dois filtros
                 return matchSetor && matchSearch;
             });
 
-            // Limpa a tabela
             tableBody.innerHTML = '';
             rowCount.textContent = `Total de itens: ${filteredProducts.length}`;
 
-            // Popula a tabela
             if (filteredProducts.length === 0) {
                 if(allProducts.length > 0) {
                     tableBody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-gray-500">Nenhum produto encontrado com esses filtros.</td></tr>`;
@@ -287,8 +258,7 @@
                 filteredProducts.forEach(product => {
                     const row = document.createElement('tr');
                     row.className = 'hover:bg-gray-50';
-                   
-                    // Usamos textContent para evitar problemas de segurança (XSS)
+                    
                     const cellSetor = document.createElement('td');
                     cellSetor.className = 'p-4 text-sm text-gray-700';
                     cellSetor.textContent = product.setor;
@@ -336,17 +306,12 @@
             saveStatus.className = "mt-2 text-center text-sm text-blue-600";
 
             try {
-                // Salva o texto bruto em um campo 'rawProductData' no documento
                 await setDoc(listDocRef, { rawProductData: rawText });
-               
+                
                 saveStatus.textContent = "Lista atualizada com sucesso!";
                 saveStatus.className = "mt-2 text-center text-sm text-green-600";
-               
-                // Limpa a área de texto após o sucesso
+                
                 dataPasteArea.value = '';
-
-                // O 'onSnapshot' vai pegar essa mudança automaticamente e atualizar a tabela.
-                // Não precisamos chamar renderTable() aqui.
 
             } catch (error) {
                 console.error("Erro ao salvar no Firestore:", error);
@@ -354,7 +319,6 @@
                 saveStatus.className = "mt-2 text-center text-sm text-red-600";
             } finally {
                 saveButton.disabled = false;
-                // Limpa a mensagem de status após alguns segundos
                 setTimeout(() => { saveStatus.textContent = ''; }, 4000);
             }
         }
@@ -366,11 +330,35 @@
         // Adiciona o event listener para o botão de salvar
         saveButton.addEventListener('click', saveListToFirebase);
 
+        // **** CÓDIGO NOVO ADICIONADO PARA A SENHA ****
+        adminSection.addEventListener('toggle', function(event) {
+            // Se a intenção é ABRIR a seção (o 'open' ainda não foi totalmente setado)
+            if (!this.hasAttribute('open')) {
+                // Previne a abertura padrão para podermos validar a senha
+                event.preventDefault();
+
+                // Pede a senha ao usuário
+                const password = prompt("Por favor, digite a senha de administrador:");
+
+                // Verifica se a senha está correta
+                if (password === "brunofe") {
+                    // Se estiver correta, abre a seção programaticamente
+                    this.open = true;
+                } else {
+                     // Se a senha estiver errada (e o usuário não clicou em 'cancelar')
+                    if (password !== null) {
+                        alert("Senha incorreta. Acesso negado.");
+                    }
+                    // Garante que a seção permaneça fechada
+                    this.open = false;
+                }
+            }
+            // Se a intenção é FECHAR, não fazemos nada e deixamos o comportamento padrão ocorrer
+        });
+
         // Inicia o aplicativo
         initFirebase();
 
     </script>
 </body>
 </html>
-
- 
