@@ -53,7 +53,9 @@
         <!-- Tabela de Produtos -->
         <div class="bg-white rounded-lg shadow">
             <div class="p-4 border-b border-gray-200">
-                <h2 class="text-lg font-semibold text-gray-800">Produtos</h2>
+                <h2 class="text-lg font-semibold text-gray-800">
+                    <span id="lastUpdateDate" class="text-blue-600"></span>Lista-Ruptura
+                </h2>
                 <p id="rowCount" class="text-sm text-gray-500 mt-0.5">Total de itens: 0</p>
             </div>
             <div class="table-container">
@@ -119,6 +121,7 @@
         const dataPasteArea = document.getElementById('dataPasteArea');
         const saveStatus = document.getElementById('saveStatus');
         const adminSection = document.getElementById('adminSection');
+        const lastUpdateDate = document.getElementById('lastUpdateDate');
 
         async function initFirebase() {
             try {
@@ -186,9 +189,19 @@
                     const data = docSnap.data();
                     allProducts = parsePastedData(data.rawProductData || "");
                     console.log(`Lista carregada com ${allProducts.length} produtos.`);
+                    
+                    // Atualiza a data de atualização
+                    if (data.lastUpdate) {
+                        const date = new Date(data.lastUpdate);
+                        const formattedDate = date.toLocaleDateString('pt-BR');
+                        lastUpdateDate.textContent = formattedDate + ' - ';
+                    } else {
+                        lastUpdateDate.textContent = '';
+                    }
                 } else {
                     console.log("Nenhum documento encontrado. A lista está vazia.");
                     allProducts = [];
+                    lastUpdateDate.textContent = '';
                     tableBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-gray-500 text-sm">A lista de produtos está vazia. Peça ao administrador para carregar os dados.</td></tr>`;
                 }
                 renderTable();
@@ -268,7 +281,10 @@
             saveStatus.className = "mt-2 text-center text-sm text-blue-600";
 
             try {
-                await setDoc(listDocRef, { rawProductData: rawText });
+                await setDoc(listDocRef, { 
+                    rawProductData: rawText,
+                    lastUpdate: new Date().toISOString()
+                });
                 
                 saveStatus.textContent = "Lista atualizada com sucesso!";
                 saveStatus.className = "mt-2 text-center text-sm text-green-600";
