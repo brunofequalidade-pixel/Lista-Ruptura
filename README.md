@@ -289,10 +289,11 @@
         saveButton.addEventListener('click', saveListToFirebase);
 
         adminSection.addEventListener('toggle', function(event) {
-            if (!this.hasAttribute('open')) {
+            if (this.open) {
                 event.preventDefault();
                 const password = prompt("Por favor, digite a senha de administrador:");
                 if (password === "brunofe") {
+                    this.setAttribute('data-authenticated', 'true');
                     this.open = true;
                 } else {
                     if (password !== null) {
