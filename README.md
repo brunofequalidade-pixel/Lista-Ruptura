@@ -24,13 +24,7 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen p-2">
 
-        <div class="container mx-auto max-w-5xl">
-        
-                <header class="bg-white p-3 rounded-md shadow-sm mb-3">
-                        <h1 class="text-sm sm:text-base font-bold text-gray-800">Lista de Produtos (Ruptura)</h1>
-                        <p class="text-gray-600 mt-1 text-xs">Consulte os produtos que não podem faltar.</p>
         </header>
 
                         <details id="adminSection" class="bg-white p-3 rounded-md shadow-sm mb-3 cursor-pointer">
