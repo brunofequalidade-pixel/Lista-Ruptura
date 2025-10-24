@@ -46,17 +46,19 @@
 
         <!-- Seção de Pesquisa -->
         <div class="bg-white p-4 rounded-lg shadow mb-4">
-            <label for="searchTerm" class="block text-sm font-semibold text-gray-700 mb-2">Pesquisar</label>
+            <div class="flex items-center justify-between mb-2">
+                <label for="searchTerm" class="text-sm font-semibold text-gray-700">Pesquisar</label>
+                <span class="text-sm font-semibold text-gray-800">
+                    Lista-Ruptura <span id="lastUpdateDate" class="text-blue-600"></span>
+                </span>
+            </div>
             <input type="search" id="searchTerm" placeholder="Digite o item ou endereço..." class="w-full p-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
         </div>
 
         <!-- Tabela de Produtos -->
         <div class="bg-white rounded-lg shadow">
             <div class="p-4 border-b border-gray-200">
-                <h2 class="text-lg font-semibold text-gray-800">
-                    <span id="lastUpdateDate" class="text-blue-600"></span>Lista-Ruptura
-                </h2>
-                <p id="rowCount" class="text-sm text-gray-500 mt-0.5">Total de itens: 0</p>
+                <p id="rowCount" class="text-sm text-gray-500">Total de itens: 0</p>
             </div>
             <div class="table-container">
                 <table class="w-full text-left text-sm">
@@ -194,7 +196,7 @@
                     if (data.lastUpdate) {
                         const date = new Date(data.lastUpdate);
                         const formattedDate = date.toLocaleDateString('pt-BR');
-                        lastUpdateDate.textContent = formattedDate + ' - ';
+                        lastUpdateDate.textContent = '- ' + formattedDate;
                     } else {
                         lastUpdateDate.textContent = '';
                     }
