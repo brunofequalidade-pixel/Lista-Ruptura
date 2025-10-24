@@ -1,22 +1,17 @@
-
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lista de Produtos - Ruptura</title>
-    <!-- Carrega o Tailwind CSS para estilização -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Fonte Inter para um visual mais limpo */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         body {
             font-family: 'Inter', sans-serif;
         }
-        /* Ajuste para a tabela não estourar em telas pequenas */
         .table-container {
             overflow-x: auto;
         }
-        /* Esconde as setas do input de pesquisa */
         input[type="search"]::-webkit-search-decoration,
         input[type="search"]::-webkit-search-cancel-button,
         input[type="search"]::-webkit-search-results-button,
@@ -25,70 +20,55 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen p-4 md:p-8">
+<body class="bg-gray-50 min-h-screen">
 
-    <div class="container mx-auto max-w-6xl">
+    <div class="container mx-auto max-w-6xl px-3 py-4">
         
-        <header class="bg-white p-6 rounded-lg shadow-lg mb-6">
-            <h1 class="text-3xl font-bold text-gray-800">Lista de Produtos (Ruptura)</h1>
-            <p class="text-gray-600 mt-1">Consulte os produtos que não podem faltar.</p>
-        </header>
-
-        <!-- Seção do Admin para Atualizar a Lista -->
-        <details id="adminSection" class="bg-white p-6 rounded-lg shadow-lg mb-6 cursor-pointer">
-            <summary class="font-semibold text-lg text-blue-700">
+        <!-- Área de Atualização (Admin) -->
+        <details id="adminSection" class="bg-white p-4 rounded-lg shadow mb-4 cursor-pointer">
+            <summary class="font-semibold text-base text-blue-700">
                 Área de Atualização (Admin)
             </summary>
-            <div class="mt-4 border-t pt-4">
+            <div class="mt-3 border-t pt-3">
                 <label for="dataPasteArea" class="block text-sm font-medium text-gray-700 mb-2">
                     Cole os dados da planilha aqui:
                 </label>
                 <p class="text-xs text-gray-500 mb-2">
                     Instrução: Na aba "Listas Por Setor", copie **apenas** os dados (da célula B2 até a última da coluna E) e cole na área abaixo.
                 </p>
-                <textarea id="dataPasteArea" rows="10" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="Copie do Excel (Ctrl+C) e cole aqui (Ctrl+V)..."></textarea>
-                <button id="saveButton" class="mt-4 w-full bg-blue-600 text-white font-bold py-3 px-5 rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                    Salvar e Atualizar Lista na Nuvem
+                <textarea id="dataPasteArea" rows="8" class="w-full p-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="Copie do Excel (Ctrl+C) e cole aqui (Ctrl+V)..."></textarea>
+                <button id="saveButton" class="mt-3 w-full bg-blue-600 text-white font-semibold py-3 px-4 text-sm rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    Salvar e Atualizar Lista
                 </button>
                 <div id="saveStatus" class="mt-2 text-center text-sm"></div>
             </div>
         </details>
 
-        <!-- Seção de Filtros e Pesquisa -->
-        <div class="bg-white p-6 rounded-lg shadow-lg mb-6">
-            <h2 class="text-xl font-semibold text-gray-700 mb-4">Filtros</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label for="filterSetor" class="block text-sm font-medium text-gray-700">Filtrar por Setor</label>
-                    <input type="text" id="filterSetor" placeholder="Digite o nome do setor..." class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                </div>
-                <div>
-                    <label for="searchTerm" class="block text-sm font-medium text-gray-700">Pesquisar por Item ou Endereço</label>
-                    <input type="search" id="searchTerm" placeholder="Digite o item ou endereço..." class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                </div>
-            </div>
+        <!-- Seção de Pesquisa -->
+        <div class="bg-white p-4 rounded-lg shadow mb-4">
+            <label for="searchTerm" class="block text-sm font-semibold text-gray-700 mb-2">Pesquisar</label>
+            <input type="search" id="searchTerm" placeholder="Digite o item ou endereço..." class="w-full p-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
         </div>
 
         <!-- Tabela de Produtos -->
-        <div class="bg-white rounded-lg shadow-lg">
-            <div class="p-6">
-                <h2 class="text-xl font-semibold text-gray-700">Produtos</h2>
-                <p id="rowCount" class="text-sm text-gray-500 mt-1">Total de itens: 0</p>
+        <div class="bg-white rounded-lg shadow">
+            <div class="p-4 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-800">Produtos</h2>
+                <p id="rowCount" class="text-sm text-gray-500 mt-0.5">Total de itens: 0</p>
             </div>
             <div class="table-container">
-                <table class="w-full min-w-[600px] text-left">
+                <table class="w-full text-left text-sm">
                     <thead class="bg-gray-50 border-b border-gray-200">
                         <tr>
-                            <th class="p-4 text-sm font-semibold text-gray-600 uppercase tracking-wider">Setor</th>
-                            <th class="p-4 text-sm font-semibold text-gray-600 uppercase tracking-wider">Item</th>
-                            <th class="p-4 text-sm font-semibold text-gray-600 uppercase tracking-wider">Descrição</th>
-                            <th class="p-4 text-sm font-semibold text-gray-600 uppercase tracking-wider">Endereço</th>
+                            <th class="p-3 text-xs font-semibold text-gray-600 uppercase">Setor</th>
+                            <th class="p-3 text-xs font-semibold text-gray-600 uppercase">Item</th>
+                            <th class="p-3 text-xs font-semibold text-gray-600 uppercase">Descrição</th>
+                            <th class="p-3 text-xs font-semibold text-gray-600 uppercase">Endereço</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody" class="divide-y divide-gray-200">
-                        <!-- Linhas da tabela serão inseridas pelo JavaScript -->
                         <tr>
-                            <td colspan="4" class="p-6 text-center text-gray-500">
+                            <td colspan="4" class="p-4 text-center text-gray-500 text-sm">
                                 Carregando lista de produtos...
                             </td>
                         </tr>
@@ -101,12 +81,10 @@
 
     <!-- Firebase -->
     <script type="module">
-        // Importações do Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import {
             getAuth,
             signInAnonymously,
-            // signInWithCustomToken não é mais necessário aqui
             onAuthStateChanged
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import {
@@ -117,8 +95,6 @@
             setLogLevel
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // **** CONFIGURAÇÃO DO FIREBASE ATUALIZADA ****
-        // Config Firebase (fornecida pelo usuário)
         const firebaseConfig = {
             apiKey: "AIzaSyBo8G3ZcWk4EepN0cHdVBtXc7tGOfcw-yg",
             authDomain: "inscricaosinuca.firebaseapp.com",
@@ -129,17 +105,13 @@
             measurementId: "G-PEDG30FS2R"
         };
         
-        // Usaremos o projectId como o 'appId' lógico para o caminho do Firestore
         const appId = firebaseConfig.projectId || 'default-app-id';
 
-        // Variáveis globais
         let db, auth;
-        let allProducts = []; // Armazena a lista completa vinda do Firebase
-        let authReady = false; // Controle para saber se a autenticação foi concluída
+        let allProducts = [];
+        let authReady = false;
         let listDocRef; 
 
-        // Elementos da DOM
-        const filterSetor = document.getElementById('filterSetor');
         const searchTerm = document.getElementById('searchTerm');
         const tableBody = document.getElementById('tableBody');
         const rowCount = document.getElementById('rowCount');
@@ -148,23 +120,16 @@
         const saveStatus = document.getElementById('saveStatus');
         const adminSection = document.getElementById('adminSection');
 
-        /**
-         * Inicializa o Firebase e configura a autenticação
-         */
         async function initFirebase() {
             try {
                 const app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
                 
-                // Define o caminho do documento no Firestore
-                // /artifacts/{projectId}/public/data/productList/mainList
                 listDocRef = doc(db, "artifacts", appId, "public/data", "productList", "mainList");
 
-                // Habilita logs para depuração
                 setLogLevel('debug');
 
-                // Escuta mudanças no estado de autenticação
                 onAuthStateChanged(auth, async (user) => {
                     if (user) {
                         console.log("Usuário autenticado:", user.uid);
@@ -174,25 +139,20 @@
                         console.log("Nenhum usuário. Tentando login anônimo...");
                         authReady = false;
                         try {
-                            // **** LÓGICA DE LOGIN ATUALIZADA ****
-                            // Como não há token inicial, sempre logamos anonimamente
                             await signInAnonymously(auth);
                         } catch (error) {
                             console.error("Erro ao autenticar anonimamente:", error);
-                            tableBody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-red-500">Erro de autenticação. Não foi possível carregar os dados.</td></tr>`;
+                            tableBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-red-500 text-sm">Erro de autenticação. Não foi possível carregar os dados.</td></tr>`;
                         }
                     }
                 });
 
             } catch (error) {
                 console.error("Erro ao inicializar o Firebase:", error);
-                tableBody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-red-500">Erro ao conectar com o banco de dados.</td></tr>`;
+                tableBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-red-500 text-sm">Erro ao conectar com o banco de dados.</td></tr>`;
             }
         }
 
-        /**
-         * Converte o texto colado (separado por tabulação) em um array de objetos.
-         */
         function parsePastedData(text) {
             if (!text || text.trim() === "") {
                 return [];
@@ -200,9 +160,9 @@
             
             const lines = text.trim().split('\n');
             return lines
-                .filter(line => line.trim() !== "") // Ignora linhas em branco
+                .filter(line => line.trim() !== "")
                 .map(line => {
-                    const parts = line.split('\t'); // Excel cola com TABS
+                    const parts = line.split('\t');
                     return {
                         setor: parts[0] || '',
                         item: parts[1] || '',
@@ -212,9 +172,6 @@
                 });
         }
 
-        /**
-         * Carrega a lista de produtos do Firebase em tempo real (onSnapshot).
-         */
         function loadProductList() {
             if (!authReady) {
                 console.warn("Aguardando autenticação para carregar a lista...");
@@ -232,30 +189,23 @@
                 } else {
                     console.log("Nenhum documento encontrado. A lista está vazia.");
                     allProducts = [];
-                    tableBody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-gray-500">A lista de produtos está vazia. Peça ao administrador para carregar os dados.</td></tr>`;
+                    tableBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-gray-500 text-sm">A lista de produtos está vazia. Peça ao administrador para carregar os dados.</td></tr>`;
                 }
                 renderTable();
             }, (error) => {
                 console.error("Erro ao carregar lista do Firestore:", error);
-                tableBody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-red-500">Erro ao carregar a lista. Verifique sua conexão.</td></tr>`;
+                tableBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-red-500 text-sm">Erro ao carregar a lista. Verifique sua conexão.</td></tr>`;
             });
         }
 
-        /**
-         * Renderiza a tabela com base nos filtros e na lista 'allProducts'.
-         */
         function renderTable() {
-            const setorFilter = filterSetor.value.toLowerCase();
             const searchFilter = searchTerm.value.toLowerCase();
 
             const filteredProducts = allProducts.filter(product => {
-                const pSetor = product.setor.toLowerCase();
                 const pItem = product.item.toLowerCase();
-                const pDesc = product.descricao.toLowerCase();
                 const pEnd = product.endereco.toLowerCase();
-                const matchSetor = !setorFilter || pSetor.includes(setorFilter);
                 const matchSearch = !searchFilter || pItem.includes(searchFilter) || pEnd.includes(searchFilter);
-                return matchSetor && matchSearch;
+                return matchSearch;
             });
 
             tableBody.innerHTML = '';
@@ -263,11 +213,11 @@
 
             if (filteredProducts.length === 0) {
                 if(allProducts.length > 0) {
-                    tableBody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-gray-500">Nenhum produto encontrado com esses filtros.</td></tr>`;
+                    tableBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-gray-500 text-sm">Nenhum produto encontrado com esses filtros.</td></tr>`;
                 } else if (!authReady) {
-                     tableBody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-gray-500">Conectando...</td></tr>`;
+                     tableBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-gray-500 text-sm">Conectando...</td></tr>`;
                 } else {
-                    tableBody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-gray-500">A lista de produtos está vazia.</td></tr>`;
+                    tableBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-gray-500 text-sm">A lista de produtos está vazia.</td></tr>`;
                 }
             } else {
                 filteredProducts.forEach(product => {
@@ -275,22 +225,22 @@
                     row.className = 'hover:bg-gray-50';
                     
                     const cellSetor = document.createElement('td');
-                    cellSetor.className = 'p-4 text-sm text-gray-700';
+                    cellSetor.className = 'p-3 text-sm text-gray-700';
                     cellSetor.textContent = product.setor;
                     row.appendChild(cellSetor);
 
                     const cellItem = document.createElement('td');
-                    cellItem.className = 'p-4 text-sm text-gray-900 font-medium';
+                    cellItem.className = 'p-3 text-sm text-gray-900 font-medium';
                     cellItem.textContent = product.item;
                     row.appendChild(cellItem);
 
                     const cellDesc = document.createElement('td');
-                    cellDesc.className = 'p-4 text-sm text-gray-700';
+                    cellDesc.className = 'p-3 text-sm text-gray-700';
                     cellDesc.textContent = product.descricao;
                     row.appendChild(cellDesc);
 
                     const cellEnd = document.createElement('td');
-                    cellEnd.className = 'p-4 text-sm text-gray-700';
+                    cellEnd.className = 'p-3 text-sm text-gray-700';
                     cellEnd.textContent = product.endereco;
                     row.appendChild(cellEnd);
 
@@ -299,9 +249,6 @@
             }
         }
 
-        /**
-         * Salva o texto bruto da área de texto no Firestore.
-         */
         async function saveListToFirebase() {
             if (!authReady) {
                 saveStatus.textContent = "Erro: Ainda não conectado. Tente novamente em alguns segundos.";
@@ -338,39 +285,24 @@
             }
         }
 
-        // Adiciona os event listeners para os filtros
-        filterSetor.addEventListener('input', renderTable);
         searchTerm.addEventListener('input', renderTable);
-
-        // Adiciona o event listener para o botão de salvar
         saveButton.addEventListener('click', saveListToFirebase);
 
-        // Lógica de senha para a seção Admin
         adminSection.addEventListener('toggle', function(event) {
-            // Se a intenção é ABRIR a seção
             if (!this.hasAttribute('open')) {
-                // Previne a abertura padrão
                 event.preventDefault();
-
-                // Pede a senha
                 const password = prompt("Por favor, digite a senha de administrador:");
-
-                // Verifica a senha
                 if (password === "brunofe") {
-                    // Correto, abre a seção
                     this.open = true;
                 } else {
-                    // Incorreto
-                    if (password !== null) { // Evita alerta se o usuário clicar em "cancelar"
+                    if (password !== null) {
                         alert("Senha incorreta. Acesso negado.");
                     }
                     this.open = false;
                 }
             }
-            // Se a intenção é FECHAR, permite o comportamento padrão
         });
 
-        // Inicia o aplicativo
         initFirebase();
 
     </script>
