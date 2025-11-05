@@ -310,7 +310,7 @@
             if (this.open) {
                 event.preventDefault();
                 const password = prompt("Por favor, digite a senha de administrador:");
-                if (password === "brunofe") {
+                if (password === "cadastro") {
                     this.setAttribute('data-authenticated', 'true');
                     this.open = true;
                 } else {
